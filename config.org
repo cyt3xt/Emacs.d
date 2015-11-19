@@ -19,7 +19,7 @@ brew install emacs --with-cocoa --with-imagemagick --with-gnutls
 
 #+begin_src emacs-lisp
 (setq user-full-name "Xt3"
-      user-mail-address "cyt3xt@gmail.com")
+      user-mail-address "badxt3@gmail.com")
 #+end_src
 
 * Customize settings
@@ -40,23 +40,22 @@ We tell Emacs to use the font we want to use.
   (add-to-list 'initial-frame-alist '(font . "Hack-13"))
   (add-to-list 'default-frame-alist '(font . "Hack-13")))
 
-;; (when (member "PingFang SC" (font-family-list))
-;;   (set-fontset-font (frame-parameter nil 'font)
-;;                     'han
-;;                     (font-spec :family "PingFang SC-14" )))
+;; Chinese Font
+(unicode-fonts-setup)  ; 我不知道为什么需要这个
+(when (member "PingFang SC" (font-family-list))
+  ;;(message "PingFang can.")
+  (dolist (charset '(kana han cjk-misc bopomofo))
+    (set-fontset-font (frame-parameter nil 'font)
+                      charset
+                      (font-spec :family "PingFang SC"
+                                 :size 13)))
+  )
 
 ;;; Emoji
-(set-fontset-font t
+(when (member "Apple Color Emoji" (font-family-list))
+  (set-fontset-font t
                   'symbol
-                  (font-spec :family "Apple Color Emoji") nil 'prepend)
-
-;; Chinese Font
-(dolist (charset '(kana han cjk-misc bopomofo))
-  (set-fontset-font (frame-parameter nil 'font)
-                    charset
-                    (font-spec :family "PingFang SC"
-                               :size 13)))
-
+                  (font-spec :family "Apple Color Emoji") nil 'prepend))
 
 #+end_src
 
@@ -126,7 +125,7 @@ Here's some configuration for [[https://github.com/bbatsov/solarized-emacs/][bba
 (bind-key "s-<f11>" 'disable-active-themes)
 #+end_src
 
-* Sane defaults 
+* Defaults 
 
 Let's start with some sane defaults, shall we?
 
@@ -218,7 +217,7 @@ at point as the default value for occur.
 (bind-key "M-s o" 'occur-dwim)
 #+end_src
 
-* Mac customizations +
+* Mac customizations
 
 There are configurations to make when running Emacs on OS X (hence the
 "darwin" system-type check).
@@ -402,7 +401,7 @@ source: [[http://whattheemacsd.com/sane-defaults.el-01.html][Magnars Sveen]]
     (bind-key "C-x C-r" 'ido-recentf-open)))
 #+end_src
 
-* Org mode
+* Org-mode
 
 Truly the way to [[http://orgmode.org/][live life in plain text]]. I mainly use it to take
 notes and save executable source blocks. I'm also starting to make use
@@ -531,7 +530,6 @@ Pandoc converts between a huge number of different file formats.
 #+end_src
 
 * Tramp
-
 #+begin_src emacs-lisp :tangle no
 (use-package tramp)
 #+end_src
@@ -735,7 +733,6 @@ This lets you use C-x u (undo-tree-visualize) to visually walk through the chang
   :ensure t
   :diminish redshank-mode
   )
-
 
 #+END_SRC
 
@@ -959,7 +956,7 @@ Eldoc provides minibuffer hints when working with Emacs Lisp.
 ;(define-key c-mode-map (kbd "TAB") 'company-complete)
 #+END_SRC
 
-* ELPA packages
+* Packages
 
 These are the packages that are not built into Emacs.
 
@@ -1754,7 +1751,12 @@ while still being in org mode.
 
 #+END_SRC
 
-* My Test 
-#+BEGIN_SRC 
-(message "Nothing.........")
+* Xt3
+#+BEGIN_SRC emacs-lisp
+(setq xt3-lisp (expand-file-name "xt3Lisp.el" user-emacs-directory))
+(load xt3-lisp)
 #+END_SRC
+
+* Reference
+- https://github.com/purcell/emacs.d
+- https://github.com/danielmai/.emacs.d 
