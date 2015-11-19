@@ -28,10 +28,3 @@
     (setq buffer-offer-save t)))
 
 (define-key global-map (kbd "C-c 1") 'xt3/new-empty-buffer)
-
-
-(provide 'xt3-lisp)
-
-
-
-
