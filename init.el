@@ -37,26 +37,26 @@
 ;(setq use-package-verbose t)
 
 ;;; Load the config
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(tooltip-mode -1)
 
 ;;; Terminal
 (when (eq window-system 'nil)
   (defconst *is-a-terminal* t)
-  (message "It is a Terminal"))
+  (message "It is a Terminal")
+  (menu-bar-mode -1))
 
 ;;; Window-System
-(when window-system
-  ;;(menu-bar-mode -1)
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1)
-  (tooltip-mode -1)
-  ;;; Mac
-  (when (eq system-type 'darwin)
-  (defconst *is-a-mac* t)
-  (message "System is a Mac"))
-  ;;; Linux
-  ;; (when (eq system-type 'darwin)
-  ;;   (defconst *is-a-mac* t)
-  ;;   (message "System is a Mac"))
+(when window-system 
+  (if (eq system-type 'darwin)
+      ;; Mac
+      (progn
+        (defconst *is-a-mac* t)
+        (message "System is a Mac"))
+    ;; Linux
+    (progn
+      (menu-bar-mode -1)))
   (org-babel-load-file (concat user-emacs-directory "config.org"))
   )
 

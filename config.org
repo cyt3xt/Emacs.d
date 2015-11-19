@@ -41,9 +41,9 @@ We tell Emacs to use the font we want to use.
   (add-to-list 'default-frame-alist '(font . "Hack-13")))
 
 ;; Chinese Font
-(unicode-fonts-setup)  ; 我不知道为什么需要这个
 (when (member "PingFang SC" (font-family-list))
   ;;(message "PingFang can.")
+  (unicode-fonts-setup)  ; 我不知道为什么需要这个
   (dolist (charset '(kana han cjk-misc bopomofo))
     (set-fontset-font (frame-parameter nil 'font)
                       charset
@@ -1048,9 +1048,9 @@ what I have them set to (with respect to Dvorak, of course).
   (add-to-list 'company-backends 'company-files t)
   (add-to-list 'company-backends 'company-css t)
   (add-to-list 'company-backends 'company-nxml t)
-  (add-to-list 'company-backends 'company-ropemacs t)
+  ;(add-to-list 'company-backends 'company-ropemacs t)
   (add-to-list 'company-backends 'company-yasnippet t)
-  (add-to-list 'company-backends 'company-tern t)
+  ;(add-to-list 'company-backends 'company-tern t)
   ;; not always down case
   (setq company-dabbrev-downcase nil)
 
@@ -1362,7 +1362,7 @@ npm install -g csslint
   :commands gist-list)
 #+END_SRC
 
-** Help - guide-key
+** Help-guide-key
 It's hard to remember keyboard shortcuts. The guide-key package pops up help after a short delay. [[https://github.com/kai2nenobu/guide-key][guide-key]]
 
 #+BEGIN_SRC emacs-lisp
