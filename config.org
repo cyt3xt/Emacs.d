@@ -40,6 +40,13 @@ We tell Emacs to use the font we want to use.
   (add-to-list 'initial-frame-alist '(font . "Hack-13"))
   (add-to-list 'default-frame-alist '(font . "Hack-13")))
 
+
+;;; Emoji
+(when (member "Apple Color Emoji" (font-family-list))
+  (set-fontset-font t
+                  'symbol
+                  (font-spec :family "Apple Color Emoji") nil 'prepend))
+
 ;; Chinese Font
 (when (member "PingFang SC" (font-family-list))
   ;;(message "PingFang can.")
@@ -50,12 +57,6 @@ We tell Emacs to use the font we want to use.
                       (font-spec :family "PingFang SC"
                                  :size 13)))
   )
-
-;;; Emoji
-(when (member "Apple Color Emoji" (font-family-list))
-  (set-fontset-font t
-                  'symbol
-                  (font-spec :family "Apple Color Emoji") nil 'prepend))
 
 #+end_src
 
