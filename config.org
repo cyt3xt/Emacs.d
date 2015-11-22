@@ -410,40 +410,6 @@ of its agenda, timestamping, and capturing features.
 
 It goes without saying that I also use it to manage my Emacs config.
 
-** Org activation bindings
-
-Set up some global key bindings that integrate with Org Mode features.
-
-#+begin_src emacs-lisp
-(bind-key "C-c l" 'org-store-link)
-(bind-key "C-c c" 'org-capture)
-(bind-key "C-c a" 'org-agenda)
-#+end_src
-
-*** Org agenda -
-
-Learned about [[https://github.com/sachac/.emacs.d/blob/83d21e473368adb1f63e582a6595450fcd0e787c/Sacha.org#org-agenda][this =delq= and =mapcar= trick from Sacha Chua's config]].
-
-#+begin_src emacs-lisp
-
-#+end_src
-
-*** Org capture +
-
-#+begin_src emacs-lisp
-(bind-key "C-c c" 'org-capture)
-;(setq org-default-notes-file "~/Dropbox/Notes/notes.org")
-
-(setq org-capture-templates
-      '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
-         "* TODO %?\n  %i\n  %a")
-        ("j" "Journal" entry (file+datetree "~/org/journal.org")
-	 "* %?\nEntered on %U\n  %i\n  %a" :clock-resume t)
-        ("n" "Notes" entry (file+headline "~/org/notes.org" "Notes")
-	 "* %?\nEntered on %U\n  %i\n  %a" :clock-resume t)))
-
-#+end_src
-
 ** Org setup
 
 Speed commands are a nice and quick way to perform certain actions
@@ -460,8 +426,41 @@ speed keys in Org mode]].
 (setq org-image-actual-width 550)
 #+end_src
 
+** Org activation bindings
 
-** Org tags
+Set up some global key bindings that integrate with Org Mode features.
+
+#+begin_src emacs-lisp
+(bind-key "C-c l" 'org-store-link)
+(bind-key "C-c c" 'org-capture)
+(bind-key "C-c a" 'org-agenda)
+#+end_src
+
+** Org agenda -
+[[https://github.com/sachac/.emacs.d/blob/83d21e473368adb1f63e582a6595450fcd0e787c/Sacha.org#org-agenda][Learned about this =delq= and =mapcar= trick from Sacha Chua's config]].
+
+#+begin_src emacs-lisp
+
+#+end_src
+
+** Org capture +
+
+#+begin_src emacs-lisp
+;(bind-key "C-c c" 'org-capture)
+;(setq org-default-notes-file "~/Dropbox/Notes/notes.org")
+
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
+         "* TODO %?\n  %i\n  %a")
+        ("j" "Journal" entry (file+datetree "~/org/journal.org")
+	 "* %?\nEntered on %U\n  %i\n  %a" :clock-resume t)
+        ("n" "Notes" entry (file+headline "~/org/notes.org" "Notes")
+	 "* %?\nEntered on %U\n  %i\n  %a" :clock-resume t)))
+
+#+end_src
+
+
+** tags
 
 The default value is -77, which is weird for smaller width windows.
 I'd rather have the tags align horizontally with the header. 45 is a
@@ -471,8 +470,13 @@ good column number to do that.
 (setq org-tags-column 45)
 #+end_src
 
-** Org babel languages
-
+** clock
+To save the clock history across Emacs sessions
+#+BEGIN_SRC elisp
+(setq org-clock-persist ’history)
+(org-clock-persistence-insinuate)
+#+END_SRC
+** babel languages
 #+begin_src emacs-lisp
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -497,7 +501,7 @@ good column number to do that.
 (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
 #+end_src
 
-** Org babel/source blocks
+** babel/source blocks
 
 I like to have source blocks properly syntax highlighted and with the
 editing popup window staying within the same window so all the windows
@@ -518,7 +522,7 @@ consistent as it doesn't pad source blocks with leading spaces.
       org-src-tab-acts-natively t)
 #+end_src
 
-** Org exporting !
+** exporting !
    
 *** Pandoc exporter
 
