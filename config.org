@@ -1345,7 +1345,9 @@ it.
 #+begin_src emacs-lisp
 (use-package flycheck
   :ensure t
-  :config (setq flycheck-html-tidy-executable "tidy5"))
+  :config 
+  ;;(setq flycheck-html-tidy-executable "tidy5")
+  (add-hook 'after-init-hook #'global-flycheck-mode))
 #+end_src
 
 *** Linter setups
@@ -1606,6 +1608,17 @@ around so much.
 #+begin_src emacs-lisp
 (use-package smooth-scrolling
   :ensure t)
+#+end_src
+
+** Swift
+#+begin_src emacs-lisp :tangle no
+(use-package swift-mode
+  :ensure t
+  :init
+  (defun flycheck-def-option-vars (&rest rest)
+    )
+  :config
+  (add-to-list 'flycheck-checkers 'swift))
 #+end_src
 
 ** Visual-regexp
