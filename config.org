@@ -50,7 +50,7 @@ We tell Emacs to use the font we want to use.
 ;; Chinese Font
 (when (member "PingFang SC" (font-family-list))
   ;;(message "PingFang can.")
-  (unicode-fonts-setup)  ; 我不知道为什么需要这个
+  ;;(unicode-fonts-setup)  ; I don't know why need it
   (dolist (charset '(kana han cjk-misc bopomofo))
     (set-fontset-font (frame-parameter nil 'font)
                       charset
@@ -436,7 +436,7 @@ Set up some global key bindings that integrate with Org Mode features.
 (bind-key "C-c a" 'org-agenda)
 #+end_src
 
-** Org agenda -
+** Org agenda 
 [[https://github.com/sachac/.emacs.d/blob/83d21e473368adb1f63e582a6595450fcd0e787c/Sacha.org#org-agenda][Learned about this =delq= and =mapcar= trick from Sacha Chua's config]].
 
 #+begin_src emacs-lisp
@@ -877,7 +877,7 @@ Eldoc provides minibuffer hints when working with Emacs Lisp.
   (add-hook 'ielm-mode-hook 'turn-on-eldoc-mode)))
 #+END_SRC
 
-** Sext
+** Set
 #+BEGIN_SRC emacs-lisp
 
 ;; Hippie-expand
@@ -913,7 +913,7 @@ Eldoc provides minibuffer hints when working with Emacs Lisp.
   "Enable features useful in any Lisp mode."
   (rainbow-delimiters-mode t)
   (enable-paredit-mode)
-  (turn-on-eldoc-mode)
+  (eldoc-mode)
   (redshank-mode)
   (add-hook 'after-save-hook #'check-parens nil t))
 
