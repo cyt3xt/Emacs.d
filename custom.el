@@ -9,8 +9,7 @@
    (quote
     ("8fed5e4b89cf69107d524c4b91b4a4c35bcf1b3563d5f306608f0c48f580fdf8" "f0a99f53cbf7b004ba0c1760aa14fd70f2eabafe4e62a2b3cf5cabae8203113b" default)))
  '(fci-rule-color "#383838")
- '(helm-locate-command "mdfind -interpret -name %s %s")
- '(helm-mode t)
+ '(safe-local-variable-values (quote ((Package . CCL))))
  '(session-use-package t nil (session))
  '(vc-annotate-background "#2B2B2B")
  '(vc-annotate-color-map

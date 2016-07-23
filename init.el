@@ -1,10 +1,7 @@
 
-
+;;; Version Requirement
 (when (version<= emacs-version "24")
   (message "Your Emacs is old, and some functionality in this config will be disabled. Please upgrade if possible."))
-
-(setq inhibit-startup-message t)
-(setq initial-scratch-message "")
 
 
 ;;; Set up package
@@ -16,9 +13,8 @@
 (package-initialize)
 
 
-;;; Bootstrap use-package
-;; Install use-package if it's not already installed.
-;; use-package is used to configure the rest of the packages.
+;;; use-package : used to configure rest of packages
+;; Install
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
@@ -26,28 +22,33 @@
 (eval-when-compile
   (require 'use-package))
 
+(setq use-package-verbose t)
+
+
+;;; Basic config
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(tooltip-mode -1)
+
+(setq inhibit-startup-message t)
+(setq initial-scratch-message "")
+
 (use-package auto-compile
   :ensure t
   :config (auto-compile-on-load-mode))
 (setq load-prefer-newer t)
 
-(require 'diminish) ;; if you use :diminish
+(require 'diminish)
 (require 'bind-key)
 
-;(setq use-package-verbose t)
 
-;;; Load the config
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
-(tooltip-mode -1)
-
-;;; Terminal
-(when (eq window-system 'nil)
+;;; UI
+;; Terminal
+(unless window-system
   (defconst *is-a-terminal* t)
   (message "It is a Terminal")
   (menu-bar-mode -1))
-
-;;; Window-System
+;; Window-System
 (when window-system 
   (if (eq system-type 'darwin)
       ;; Mac
@@ -56,9 +57,8 @@
         (message "System is a Mac"))
     ;; Linux
     (progn
-      (menu-bar-mode -1)))
-  (org-babel-load-file (concat user-emacs-directory "config.org"))
-  )
+      (defconst *is-a-linux* t)))
+  (org-babel-load-file (concat user-emacs-directory "config.org")))
 
 
 
