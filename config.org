@@ -1,16 +1,9 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Xt3
-#+STARTUP: indent
-#+Version: 1.0
+#+Version: 2.0
 
-* Personal Information
-
-#+begin_src emacs-lisp
-(setq user-full-name "Xt3"
-      user-mail-address "badxt3@gmail.com")
-#+end_src
-
-* Default
+* Setting
+** Default
 #+begin_src emacs-lisp
 ;; These functions are useful. Activate them.
 (put 'downcase-region 'disabled nil)
@@ -27,6 +20,7 @@
 (setq vc-make-backup-files t)
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
+(global-auto-revert-mode 1)
 
 ;; UTF-8 please
 (setq locale-coding-system 'utf-8) ; pretty
@@ -37,6 +31,7 @@
 (when (display-graphic-p)
   (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 
+;;; UI
 ;; Turn off the blinking cursor
 (blink-cursor-mode -1)
 ;;
@@ -51,215 +46,106 @@
 (global-visual-line-mode)
 (diminish 'visual-line-mode)
 (setq uniquify-buffer-name-style 'forward)
-
-;; Just one space is needed
-(setq sentence-end-double-space nil)
-
-;; delete the region when typing
-(delete-selection-mode t)
-
-;; -i gets alias definitions from .bash_profile
-(setq shell-command-switch "-ic")
-
 ;; Turn on syntax highlighting for all buffers:
 (global-font-lock-mode t)
-
 ;; GUI
 (setq use-file-dialog nil)
 (setq use-dialog-box nil)
 
-;; Macro
-(load-file (expand-file-name "macros" user-emacs-directory))
-
-;; Font
-;; change font size
-;; (set-face-attribute 'default nil :height 100)
-
-;;; Mode-line
-;; Display Time : When displaying the time with display-time-mode
-(setq display-time-default-load-average nil)
-;; Face
-(set-face-attribute `mode-line nil :box nil)
-(set-face-attribute `mode-line-inactive nil :box nil)
-;; Format
-(setq-default
-     mode-line-format
-     '("%e"
-       mode-line-front-space
-       mode-line-mule-info
-       mode-line-client
-       mode-line-modified
-       mode-line-remote
-       mode-line-frame-identification
-       mode-line-buffer-identification
-       "   "
-       mode-line-position
-       (vc-mode vc-mode)
-       "  "
-       mode-line-modes
-       mode-line-misc-info
-       mode-line-end-spaces))
-;; Display Battery Mode
-(setq battery-mode-line-format "[%b%p%% %t]")
+;;; Edit
+;; Just one space is needed
+(setq sentence-end-double-space nil)
+;; delete the region when typing
+(delete-selection-mode t)
+;; witespace
+(setq show-trailing-whitespace nil)
 
 
 ;;; Scrolling
-(setq mouse-wheel-scroll-amount (quote (0.01)))
+(setq mouse-wheel-scroll-amount (quote (0.07)))
+  #+end_src
 
-;;; Chinese
-;; 设置 sentence-end 可以识别中文标点
-(setq sentence-end
-      "\\([。！？]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*")
-
-;;; Occur
-;; takes current region or  symbol at point as  default value for occur
-(defun occur-dwim ()
-  "Call `occur' with a sane default."
-  (interactive)
-  (push (if (region-active-p)
-            (buffer-substring-no-properties
-             (region-beginning)
-             (region-end))
-          (thing-at-point 'symbol))
-        regexp-history)
-  (call-interactively 'occur))
-
-(bind-key "M-s o" 'occur-dwim)
-
-#+end_src
-
-* Customize setting
-#+begin_src emacs-lisp
+** Customize
+- Custom file
+  #+BEGIN_SRC emacs-lisp
+;;; Load customize file
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
-#+end_src
 
-* Theme
-- [[https://github.com/n3mo/cyberpunk-theme.el][Cyberpunk]]
+;;; Macro file
+(load-file (expand-file-name "macros" user-emacs-directory))
+  #+END_SRC
+- Personal information
+  #+BEGIN_SRC emacs-lisp
+(setq user-full-name "Xt3"
+      user-mail-address "badxt3@gmail.com")  
+  #+END_SRC
+- Font 
   #+begin_src emacs-lisp
-(use-package cyberpunk-theme
-  :ensure t
-  :config
-  (progn
-    (load-theme 'cyberpunk t)
-    ))
-  #+end_src
-- [[https://github.com/bbatsov/solarized-emacs/][Solarized themes]]
-  #+begin_src emacs-lisp
-(use-package solarized-theme
-  :config
-  (setq solarized-use-variable-pitch nil)
-  :ensure t)
-  #+end_src
-- Handing
-  - Switch
-    #+begin_src emacs-lisp
-;; Switching themes: disable-theme, load-theme
-(defun switch-theme (theme)
-  "Disables any currently active themes and loads THEME."
-  ;; This interactive call is taken from `load-theme'
-  (interactive
-   (list
-    (intern (completing-read "Load custom theme: "
-                             (mapc 'symbol-name
-                                   (custom-available-themes))))))
-  (let ((enabled-themes custom-enabled-themes))
-    (mapc #'disable-theme custom-enabled-themes)
-    (load-theme theme t)))
-
-(defun disable-active-themes ()
-  "Disables any currently active themes listed in `custom-enabled-themes'."
-  (interactive)
-  (mapc #'disable-theme custom-enabled-themes))
-
-(bind-key "s-<f12>" 'switch-theme)
-(bind-key "s-<f11>" 'disable-active-themes)
-   #+end_src
-
-* Desktop Save
-
-#+BEGIN_SRC emacs-lisp
-;; save a list of open files in ~/.emacs.d/.emacs.desktop
-(setq desktop-path (list user-emacs-directory)
-      desktop-auto-save-timeout 600)
-(desktop-save-mode 1)
-
-(setq-default history-length 1000)
-(savehist-mode t)
-
-(use-package session
-  :ensure t
-  :config
-  (setq session-save-file (expand-file-name ".session" user-emacs-directory))
-  (add-hook 'after-init-hook 'session-initialize))
-
-;; save a bunch of variables to the desktop file
-;; for lists specify the len of the maximal saved data also
-(setq desktop-globals-to-save
-      (append '((comint-input-ring        . 50)
-                (compile-history          . 30)
-                desktop-missing-file-warning
-                (dired-regexp-history     . 20)
-                (extended-command-history . 30)
-                (face-name-history        . 20)
-                (file-name-history        . 100)
-                (grep-find-history        . 30)
-                (grep-history             . 30)
-                (ido-buffer-history       . 100)
-                (ido-last-directory-list  . 100)
-                (ido-work-directory-list  . 100)
-                (ido-work-file-list       . 100)
-                (magit-read-rev-history   . 50)
-                (minibuffer-history       . 50)
-                (org-clock-history        . 50)
-                (org-refile-history       . 50)
-                (org-tags-history         . 50)
-                (query-replace-history    . 60)
-                (read-expression-history  . 60)
-                (regexp-history           . 60)
-                (regexp-search-ring       . 20)
-                register-alist
-                (search-ring              . 20)
-                (shell-command-history    . 50)
-                tags-file-name
-                tags-table-list)))
-
-(use-package frame-restore
-  :ensure t)
-#+END_SRC
-* Font
-#+begin_src emacs-lisp
 (when (member "Hack" (font-family-list))
   (add-to-list 'initial-frame-alist '(font . "Hack-13"))
   (add-to-list 'default-frame-alist '(font . "Hack-13")))
 
 
 (when (boundp '*is-a-mac*)
-  ;; Emoji
-  (when (member "Apple Color Emoji" (font-family-list))
-    (set-fontset-font t
-                      'symbol
-                      (font-spec :family "Apple Color Emoji") nil 'prepend))
-
   ;; Chinese Font
   (when (member "PingFang SC" (font-family-list))
-;;    (unicode-fonts-setup)  ; Sometimes need this, but why?
+    ;; (unicode-fonts-setup) ; Sometimes need this, but why?
     (dolist (charset '(kana han cjk-misc bopomofo))
       (set-fontset-font (frame-parameter nil 'font)
                         charset
-                        (font-spec :family "PingFang SC"
+                        (font-spec :family "PingFang SC Regular"
                                    :size 13)))))
-#+end_src
+  #+end_src
+- Theme
+  - [[https://github.com/n3mo/cyberpunk-theme.el][Cyberpunk]] 
+    #+BEGIN_SRC emacs-lisp
+(use-package cyberpunk-theme
+  :config
+  (progn
+    (load-theme 'cyberpunk t)))
+    #+end_src
+- Window
+  #+begin_src emacs-lisp
+;;; Split windows + switch to other window
+  (defun vsplit-other-window ()
+    "Splits the window vertically and switches to that window."
+    (interactive)
+    (split-window-vertically)
+    (other-window 1 nil))
+  (defun hsplit-other-window ()
+    "Splits the window horizontally and switches to that window."
+    (interactive)
+    (split-window-horizontally)
+    (other-window 1 nil))
 
-* For Mac
-#+begin_src emacs-lisp
+  (bind-key "C-x 2" 'vsplit-other-window)
+  (bind-key "C-x 3" 'hsplit-other-window)
+
+
+;; Help window get focus
+(setq help-window-select t)
+    #+end_src
+- Modeline
+  #+BEGIN_SRC emacs-lisp
+;; Display Time : When displaying the time with display-time-mode
+(setq display-time-default-load-average nil)
+
+;; Display Battery Mode
+(setq battery-mode-line-format "[%b%p%% %t]")  
+  #+END_SRC
+- Chinese
+  #+BEGIN_SRC emacs-lisp
+;; 设置 sentence-end 可以识别中文标点
+(setq sentence-end
+      "\\([。！？]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*")  
+  #+END_SRC
+** For Mac
+#+BEGIN_SRC emacs-lisp
 (when (boundp '*is-a-mac*)
   ;; delete files by moving them to the trash
   (setq delete-by-moving-to-trash t)
   (setq trash-directory "~/.Trash")
-
-  ;; Don't make new frames when opening a new file with Emacs
-  (setq ns-pop-up-frames nil)
 
   ;; Fn -> hyper
   (setq ns-function-modifier 'hyper)
@@ -267,20 +153,20 @@
   (setq ns-command-modifier 'meta)
   ;; Opt -> super
   (setq ns-option-modifier 'super)
+  
+  ;; Don't make new frames when opening a new file with Emacs
+  (setq ns-pop-up-frames nil)
+
+  ;; Fullscreen!
+  (setq ns-use-native-fullscreen nil)   ; Not Lion style
+  (bind-key "<s-return>" 'toggle-frame-fullscreen)
 
   ;; Use super-` to switch between Emacs windows (not frames)
   (bind-key "s-`" 'other-window)
-  
   ;; Use super-Shift-` to switch Emacs frames in reverse
   (bind-key "s-~" (lambda () (interactive) (other-window -1)))
-
   ;; Because of the keybindings above, set one for `other-frame'
   (bind-key "s-1" 'other-frame)
-
-  ;; Fullscreen!
-  (setq ns-use-native-fullscreen nil)  ; Not Lion style
-  (bind-key "<s-return>" 'toggle-frame-fullscreen)
-
   ;; buffer switching
   (bind-key "s-{" 'previous-buffer)
   (bind-key "s-}" 'next-buffer)
@@ -313,658 +199,96 @@
   ;; Not going to use these commands
   (put 'ns-print-buffer 'disabled t)
   (put 'suspend-frame 'disabled t)
+
   ;; font
   (setq mac-allow-anti-aliasing t)
 
   ;; Lisp 
-  (setq inferior-lisp-program "~/ccl/dx86cl64")
+  (setq inferior-lisp-program "ccl")
   
   ;; mdfind is the command line interface to Spotlight
   (setq locate-command "mdfind")
 
   ;; exec-path-from-shell : makes the command-line path with Emacs's shell match the same one on OS X.
   (use-package exec-path-from-shell
-    ;; :if (memq window-system '(mac ns))
-    :ensure t
     :init
     (exec-path-from-shell-initialize))
   )
 #+end_src
 
-* -----
-* Ido
-#+begin_src emacs-lisp
-(use-package ido
+** Desktop Save & Session
+#+BEGIN_SRC emacs-lisp
+;; save a list of open files in ~/.emacs.d/.emacs.desktop
+(setq desktop-path (list user-emacs-directory)
+      desktop-auto-save-timeout 600)
+(desktop-save-mode 1)
+
+(setq-default history-length 1000)
+(savehist-mode t)
+
+;; save a bunch of variables to the desktop file
+;; for lists specify the len of the maximal saved data also
+
+(setq desktop-globals-to-save
+      (append '((comint-input-ring        . 50)
+                (compile-history          . 30)
+                desktop-missing-file-warning
+                (dired-regexp-history     . 20)
+                (extended-command-history . 30)
+                (face-name-history        . 20)
+                (file-name-history        . 100)
+                (grep-find-history        . 30)
+                (grep-history             . 30)
+                (ido-buffer-history       . 100)
+                (ido-last-directory-list  . 100)
+                (ido-work-directory-list  . 100)
+                (ido-work-file-list       . 100)
+                (magit-read-rev-history   . 50)
+                (minibuffer-history       . 50)
+                (org-clock-history        . 50)
+                (org-refile-history       . 50)
+                (org-tags-history         . 50)
+                (query-replace-history    . 60)
+                (read-expression-history  . 60)
+                (regexp-history           . 60)
+                (regexp-search-ring       . 20)
+                register-alist
+                (search-ring              . 20)
+                (shell-command-history    . 50)
+                tags-file-name
+                tags-table-list)))
+
+(use-package session
   :config
-  (progn
-    (setq ido-enable-flex-matching t)
-    (setq ido-everywhere t)
-    (ido-mode t)
-    ;; (use-package ido-ubiquitous
-    ;;   :ensure t
-    ;;   :init (ido-ubiquitous-mode))
-    (use-package ido-vertical-mode
-      :ensure t
-      :init (ido-vertical-mode 1)
-      (setq ido-vertical-define-keys 'C-n-and-C-p-only))
-    ))
+  (setq session-save-file (expand-file-name ".session" user-emacs-directory))
+  (add-hook 'after-init-hook 'session-initialize))
+
+(use-package frame-restore)
+#+END_SRC
+
+** Server
+#+BEGIN_SRC emacs-lisp
+(use-package server
+  :config (unless (server-running-p)
+            (server-start)))
+#+END_SRC
+** Shell
+#+begin_src emacs-lisp
+(bind-key "C-x m" 'shell)
+(bind-key "C-x M" 'ansi-term)
+
+;; -i gets alias definitions from .bash_profile
+(setq shell-command-switch "-ic")
 #+end_src
 
-* Ivy
+** Org
 #+BEGIN_SRC emacs-lisp
-(use-package ivy :ensure t)
-(use-package swiper
-  :ensure t
-  :init 
-  (use-package counsel
-    :ensure t)
-  :config
-  (progn
-   (ivy-mode 1)
-   (setq ivy-use-virtual-buffers t)
-   (global-set-key "\C-s" 'swiper)
-   (global-set-key (kbd "C-c C-r") 'ivy-resume)
-   ;;(global-set-key (kbd "<f6>") 'ivy-resume)
-   ;;(global-set-key (kbd "M-x") 'counsel-M-x)
-   ;;(global-set-key (kbd "C-x C-f") 'counsel-find-file)
-   ;;(global-set-key (kbd "<f1> f") 'counsel-describe-function)
-   ;;(global-set-key (kbd "<f1> v") 'counsel-describe-variable)
-   ;;(global-set-key (kbd "<f1> l") 'counsel-load-library)
-   ;;(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
-   ;;(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
-   ;;(global-set-key (kbd "C-c g") 'counsel-git)
-   ;;(global-set-key (kbd "C-c j") 'counsel-git-grep)
-   ;;(global-set-key (kbd "C-c k") 'counsel-ag)
-   ;;(global-set-key (kbd "C-x l") 'counsel-locate)
-   ;;(global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
-   (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
-   )
-#+END_SRC
+;;; Startup
+(setq org-startup-indented t)
 
-* Helm
+;;; Edit
+(setq org-catch-invisible-edits t)
 
-#+begin_src emacs-lisp
-(use-package helm
-  :ensure t
-  :diminish helm-mode
-  :init (progn
-          (require 'helm-config)
-          (use-package helm-projectile
-            :ensure t
-            :commands helm-projectile
-            :bind ("C-c p h" . helm-projectile))
-          (use-package helm-ag :ensure t)
-          (setq helm-locate-command "mdfind -interpret -name %s %s"
-                helm-exit-idle-delay 0.1
-                helm-input-idle-delay 0.01
-                helm-idle-delay 0.01
-                ;; truncate long lines in helm completion
-                                        ; helm-truncate-lines t
-                ;; may be overridden if 'ggrep' is in path (see below)
-                helm-grep-default-command
-                "grep -a -d skip %e -n%cH -e %p %f"
-                helm-grep-default-recurse-command
-                "grep -a -d recurse %e -n%cH -e %p %f"
-                ;; do not display invisible candidates
-                helm-quick-update t
-                ;; open helm buffer in another window
-                helm-split-window-default-side 'other
-                ;; open helm buffer inside current window, don't occupy whole other window
-                helm-split-window-in-side-p t
-                ;; limit the number of displayed canidates
-                helm-candidate-number-limit 200
-                ;; don't use recentf stuff in helm-ff
-                                        ;helm-ff-file-name-history-use-recentf nil
-                ;; move to end or beginning of source when reaching top or bottom
-                ;; of source
-                                        ;helm-move-to-line-cycle-in-source t
-                ;; don't displace the header line
-                                        ;helm-display-header-line nil
-                ;; fuzzy matching
-                helm-M-x-fuzzy-match t
-                helm-buffers-fuzzy-matching t
-                helm-semantic-fuzzy-match t
-                helm-imenu-fuzzy-match t
-                helm-completion-in-region-fuzzy-match t
-                helm-recentf-fuzzy-match t
-                helm-ag-fuzzy-match t
-                helm-locate-fuzzy-match t
-                projectile-indexing-method 'alien
-                helm-ff-newfile-prompt-p nil
-                )
-          (setq helm-yas-display-key-on-candidate t
-                helm-M-x-requires-pattern nil
-                helm-ff-skip-boring-files t)
-          
-          (helm-mode))
-  :bind
-  (("C-c h" . helm-command-prefix)
-   ("C-x b" . helm-mini)
-   ("C-x C-b" . helm-buffers-list)
-   ("C-`" . helm-resume)
-   ("M-x" . helm-M-x)
-   ("C-x C-f" . helm-find-files)
-   ("M-y" . helm-show-kill-ring)
-   ("C-x c SPC" . helm-all-mark-rings)
-   
-   ("C-h a" . helm-apropos)
-   ("C-c h o" . helm-occur)
-   ("C-c h s" . helm-swoop)
-   
-   ("C-c h y" . helm-yas-complete)
-   ("C-c h Y" . helm-yas-create-snippet-on-region)
-
-                                        ;("C-c h t" . helm-world-time)
-   
-   ("C-c h m" . helm-man-woman)
-   ("C-c h a" . helm-do-ag)
-   ("M-g >" . helm-ag-this-file)
-   ("M-g ," . helm-ag-pop-stack)
-   ("M-g ." . helm-do-grep)
-                                        ;("C-x C-i" . helm-semantic-or-imenu)
-   
-   )
-  
-  )
-
-;;Great for describing bindings. I'll replace the binding for where-is too.
-(use-package helm-descbinds
-  :ensure t
-  :defer t
-  :bind (("C-h b" . helm-descbinds)
-         ("C-h w" . helm-descbinds)))
-
-(use-package helm-swoop
-  :ensure t
-  :bind (("M-i" . helm-swoop)
-         ("M-I" . helm-swoop-back-to-last-point)
-         ("C-c M-i" . helm-multi-swoop))
-  :config
-  (progn
-    ;; When doing isearch, hand the word over to helm-swoop
-    (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
-    ;; From helm-swoop to helm-multi-swoop-all
-    (define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
-    ;; Save buffer when helm-multi-swoop-edit complete
-    (setq helm-multi-swoop-edit-save t
-          ;; If this value is t, split window inside the current window
-          helm-swoop-split-with-multiple-windows nil
-          ;; Split direcion. 'split-window-vertically or 'split-window-horizontally
-          helm-swoop-split-direction 'split-window-vertically
-          ;; If nil, you can slightly boost invoke speed in exchange for text color
-          helm-swoop-speed-or-color nil)))
-#+end_src
-
-* Smart-mode-line
-- Display a more compact mode line
-#+BEGIN_SRC emacs-lisp
-(use-package smart-mode-line
-  :ensure t
-  :config
-  (progn
-    ;;(setq sml/theme 'dark)
-    ;;(setq sml/theme 'light)
-    (setq sml/theme 'respectful)
-    (setq sml/no-confirm-load-theme t)
-    (sml/setup)
-    (set-face-attribute `mode-line nil
-                        :box nil)
-    (set-face-attribute `mode-line-inactive nil
-                        :box nil)
-    ;;; can stack abbreviations sequentially, by adding them in order
-    ;; (add-to-list 'sml/replacer-regexp-list '("^~/Git-Projects/" ":Git:") t)
-    ;; (add-to-list 'sml/replacer-regexp-list '("^:Git:\(.*\)/src/main/java/" ":G/\1/SMJ:") t)
-    ;; override one of the pre-defined abbreviations 
-    ;; (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":DBox:"))
-    ))
-#+END_SRC
-
-* Zoom-frm
-#+begin_src emacs-lisp
-(use-package zoom-frm
-  :ensure t
-  :bind (("C-M-=" . zoom-in/out)
-         ("H-z"   . toggle-zoom-frame))
-  :config
-  ;; enables a "presentation mode" when calling toggle-zoom-frame
-  (setq frame-zoom-font-difference 10))
-#+end_src
-   
-* ---
-* Winner mode
-#+begin_src emacs-lisp
-(winner-mode t)
-#+end_src
-* ---
-* Dired
-#+BEGIN_SRC emacs-lisp
-(add-hook 'dired-mode-hook 'auto-revert-mode)
-
-;; Also auto refresh dired, but be quiet about it
-(setq global-auto-revert-non-file-buffers t)
-(setq auto-revert-verbose nil)
-
-(setq dired-isearch-filenames 'dwim)
-(setq-default diredp-hide-details-initially-flag nil
-              dired-dwim-target t)
-
-(use-package dired+
-  :ensure t
-  :config
-  )
-
-(use-package dired-sort
-  :ensure t
-  )
-#+END_SRC
-* ---
-* Avy
-#+BEGIN_SRC emacs-lisp
-(use-package avy
-  :ensure t
-  :config
-  (progn
-    (global-set-key (kbd "C-:") 'avy-goto-char)
-    ;;(global-set-key (kbd "C-'") 'avy-goto-char-2)
-    (global-set-key (kbd "M-g f") 'avy-goto-line)
-    (global-set-key (kbd "M-g w") 'avy-goto-word-1)
-    ;;(global-set-key (kbd "M-g e") 'avy-goto-word-0)
-   ))
-#+END_SRC
-* Ace Window
-#+begin_src emacs-lisp
-(use-package ace-window
-  :ensure t
-  :config
-  ;; default keys are 1~9  
-  (setq aw-keys '(?a ?o ?e ?u ?h ?t ?n ?s))
-  (ace-window-display-mode)
-  :bind ("H-o" . ace-window))
-#+end_src
-* ---
-* Company
-#+BEGIN_SRC emacs-lisp
-(use-package company
-  :ensure t
-  ;; :disabled t
-  :config
-  (progn
-    (add-to-list 'company-backends 'company-capf t)
-    (add-to-list 'company-backends 'company-clang t)
-    (add-to-list 'company-backends 'company-dabbrev t)
-    (add-to-list 'company-backends 'company-ispell t)
-    (add-to-list 'company-backends 'company-files t)
-    (add-to-list 'company-backends 'company-css t)
-    (add-to-list 'company-backends 'company-nxml t)
-    ;;(add-to-list 'company-backends 'company-ropemacs t)
-    (add-to-list 'company-backends 'company-yasnippet t)
-    ;;(add-to-list 'company-backends 'company-tern t)
-    
-    ;; not always down case
-    (setq company-dabbrev-downcase nil)
-
-    (add-hook 'after-init-hook 'global-company-mode)
-    (setq company-auto-complete nil)
-    ;;(global-set-key (kbd "TAB") 'company-complete)
-    (setq company-show-numbers t)
-    (setq company-idle-delay 0)
-   
-    (use-package company-statistics
-      :ensure t
-      :config
-      (add-hook 'after-init-hook 'company-statistics-mode)
-      )
-    ))
-#+END_SRC
-* ---
-* Undo Tree
-#+BEGIN_SRC emacs-lisp
-(use-package undo-tree
-  :ensure t
-  :diminish undo-tree-mode
-  :config
-  (progn
-    (global-undo-tree-mode)
-    ;; Show relative times in the undo tree visualizer
-    (setq undo-tree-visualizer-timestamps t)
-    ;; Show diffs when browsing through the undo tree
-    (setq undo-tree-visualizer-diff t)
-    ;; Save history to a file
-    ;(setq undo-tree-auto-save-history t)
-    (define-key undo-tree-map (kbd "C-x u") 'undo-tree-visualize)
-    (define-key undo-tree-map (kbd "C-/") 'undo-tree-undo)
-    ))
-#+END_SRC
-
-* Rainbow delimiters
-#+BEGIN_SRC emacs-lisp
-(use-package rainbow-delimiters :ensure t)
-#+END_SRC
-* Rainbow Mode
-#+BEGIN_SRC emacs-lisp
-(use-package rainbow-mode
-  :ensure t
-  :config
-  (progn
-    (add-hook 'css-mode-hook 'rainbow-mode)))
-#+END_SRC
-* Visual Regexp
-#+begin_src emacs-lisp
-(use-package visual-regexp
-  :ensure t
-  :init
-  (use-package visual-regexp-steroids :ensure t)
-  :bind (("C-c r" . vr/replace)
-         ("C-c q" . vr/query-replace)
-         ;; Need multiple cursors
-         ("C-c m" . vr/mc-mark) 
-         ;; use visual-regexp-steroids's isearch instead of the built-in regexp isearch
-         ("C-M-r" . vr/isearch-backward)
-         ("C-M-s" . vr/isearch-forward)))
-#+end_src
-* ---
-* Guide Key
-#+BEGIN_SRC emacs-lisp
-(use-package guide-key
-  ;;:defer t
-  ;;:disabled t
-  :diminish guide-key-mode
-  :config
-  (progn
-    (setq guide-key/guide-key-sequence '("C-x" "C-c" "C-x 4" "C-x 5" "C-c ;" "C-c ; f" "C-c ' f" "C-x n" "C-x C-r" "C-x r"))
-    ;(setq guide-key/recursive-key-sequence-flag t)
-    ;; (setq guide-key/highlight-command-regexp
-    ;;   '("rectangle"
-    ;;     ("register" . font-lock-type-face)
-    ;;     ("bookmark" . "hot pink")))
-
-    ;;(setq guide-key/idle-delay 0.1)
-    ;(setq guide-key/popup-window-position 'bottom)
-    (setq guide-key/text-scale-amount -1)
-    
-    ;; (defun guide-key/my-hook-function-for-org-mode ()
-    ;;   (guide-key/add-local-guide-key-sequence "C-c")
-    ;;   (guide-key/add-local-guide-key-sequence "C-c C-x")
-    ;;   (guide-key/add-local-highlight-command-regexp "org-"))
-    ;;(add-hook 'org-mode-hook 'guide-key/my-hook-function-for-org-mode)
-    ;; (setq guide-key/guide-key-sequence
-    ;;   '("C-x r" "C-x 4"
-    ;;     (org-mode "C-c C-x")
-    ;;     (outline-minor-mode "C-c @")))
-
-    (guide-key-mode 1)
-    (add-hook 'dired-mode-hook
-              (lambda () (guide-key/add-local-guide-key-sequence "%")))
-    ))  
-#+END_SRC
-* ---
-* whole-line-or-region
-#+BEGIN_SRC emacs-lisp
-(use-package whole-line-or-region
-  :ensure t
-  :diminish whole-line-or-region-mode
-  :config
-  (whole-line-or-region-mode t)
-  (make-variable-buffer-local 'whole-line-or-region-mode)
-)
-#+END_SRC
-* Mutiple-cursors
-#+begin_src emacs-lisp
-(use-package multiple-cursors
-  :ensure t
-  :bind (("C-S-c C-S-c" . mc/edit-lines)
-         ("C->"         . mc/mark-next-like-this)
-         ("C-<"         . mc/mark-previous-like-this)
-         ("C-c C-<"     . mc/mark-all-like-this)
-         ("C-!"         . mc/mark-next-symbol-like-this)
-         ("s-d"         . mc/mark-all-dwim)))
-#+end_src
-* ---
-* Helm Dash
-#+BEGIN_SRC emacs-lisp
-  (use-package helm-dash
-    :ensure t
-  )
-#+END_SRC
-* Yasnippet
-#+begin_src emacs-lisp
-(use-package yasnippet
-  :ensure t
-  :diminish yas-minor-mode
-  :config
-  (progn
-    (define-key yas-minor-mode-map (kbd "<tab>") nil)
-    (define-key yas-minor-mode-map (kbd "TAB") nil)
-    (define-key yas-minor-mode-map (kbd "M-/") 'yas-expand)
-    
-    (setq yas-snippet-dirs (concat user-emacs-directory "snippets"))
-    (yas-global-mode)
-    
-    ;;(add-hook 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
-    ;;(setq yas-expand-only-for-last-commands '(self-insert-command))
-    
-    (defun yas-popup-isearch-prompt (prompt choices &optional display-fn)
-      (when (featurep 'popup)
-        (popup-menu*
-         (mapcar
-          (lambda (choice)
-            (popup-make-item
-             (or (and display-fn (funcall display-fn choice))
-                 choice)
-             :value choice))
-          choices)
-         :prompt prompt
-         ;; start isearch mode immediately
-         :isearch t
-         )))
-
-    (setq yas-prompt-functions '(yas-popup-isearch-prompt yas-ido-prompt yas-no-prompt))
-
-    ))
-#+end_src
-
-* -
-* Redshank 
-#+BEGIN_SRC emacs-lisp
-(use-package redshank
-  :ensure t
-  :diminish redshank-mode
-  )
-#+END_SRC
-* Slime
-
-#+BEGIN_SRC emacs-lisp
-
-(use-package slime-company
-  :ensure t
-  )
-
-(use-package slime
-  :ensure t
-  :config
-  (require 'slime-autoloads)
-  ;(setq inferior-lisp-program "~/ccl/dx86cl64")
-  (setq slime-contribs '(slime-fancy))
-  (use-package ac-slime :ensure t)
-  (use-package hippie-expand-slime :ensure t)
-  (when (executable-find "sbcl")
-    (add-to-list 'slime-lisp-implementations
-                 '(sbcl ("sbcl") :coding-system utf-8-unix)))
-  (when (executable-find "scheme")
-    (add-to-list 'slime-lisp-implementations
-                 '(scheme ("scheme") :coding-system utf-8-unix)))
-  (when (executable-find "ccl")
-    (add-to-list 'slime-lisp-implementations
-                 '(ccl ("ccl") :coding-system utf-8-unix)))
-  (setq slime-protocol-version 'ignore)
-  (setq slime-net-coding-system 'utf-8-unix)
-
-  (setq slime-complete-symbol*-fancy t)
-  (setq slime-complete-symbol-function 'slime-fuzzy-complete-symbol)
-  
-  (slime-setup '(slime-repl slime-fuzzy slime-company))
-
-  )
-
-(defun sanityinc/slime-repl-setup ()
-  "Mode setup function for slime REPL."
-  (xt3/lisp-setup)
-  (set-up-slime-hippie-expand)
-  (set-up-slime-ac t)
-  (setq show-trailing-whitespace nil))
-
-;; (eval-after-load 'slime-repl
-;;   ;; Stop SLIME's REPL from grabbing DEL, which is annoying when backspacing over a '('
-;; (progn
-;;   (eval-after-load 'paredit 
-;;     (define-key slime-repl-mode-map (read-kbd-macro paredit-backward-delete-key) nil))
-
-;;   ;; Bind TAB to `indent-for-tab-command', as in regular Slime buffers.
-;;   (define-key slime-repl-mode-map (kbd "TAB") 'indent-for-tab-command)
-
-(add-hook 'slime-repl-mode-hook 'sanityinc/slime-repl-setup)
-
-;(eval-after-load 'auto-complete
- ; (add-to-list 'ac-modes 'slime-repl-mode))
-
-
-
-
-#+END_SRC
-* Lispy
-#+BEGIN_SRC emacs-lisp
-  (use-package lispy
-    :ensure t
-    :config
-    (progn
-      (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
-      ))
-#+END_SRC
-
-* Eldoc
-#+BEGIN_SRC emacs-lisp
-  (use-package "eldoc"
-    :diminish eldoc-mode
-    :commands turn-on-eldoc-mode
-    :defer t
-  )
-#+END_SRC
-
-* Elisp-slime-nav
-#+BEGIN_SRC emacs-lisp
-(use-package elisp-slime-nav
-  :ensure t
-  :config 
-  (dolist (hook '(emacs-lisp-mode-hook ielm-mode-hook))
-    (add-hook hook 'elisp-slime-nav-mode))
-  )
-#+END_SRC
-* Lisp Hook
-#+BEGIN_SRC emacs-lisp
-  ;(define-key lisp-interaction-mode-map (kbd "s-j") 'eval-print-last-sexp)
-  (global-set-key (kbd "s-j") 'eval-print-last-sexp)
-
-  ;; Hippie-expand
-  (defun my/emacs-lisp-module-name ()
-    "Search the buffer for `provide' declaration."
-    (save-excursion
-      (goto-char (point-min))
-      (when (search-forward-regexp "^(provide '" nil t)
-        (symbol-name (symbol-at-point)))))
-
-  ;; Credit to Chris Done for this one.
-  (defun my/try-complete-lisp-symbol-without-namespace (old)
-    "Hippie expand \"try\" function which expands \"-foo\" to \"modname-foo\" in elisp."
-    (unless old
-      (he-init-string (he-lisp-symbol-beg) (point))
-      (when (string-prefix-p "-" he-search-string)
-        (let ((mod-name (my/emacs-lisp-module-name)))
-          (when mod-name
-            (setq he-expand-list (list (concat mod-name he-search-string)))))))
-    (when he-expand-list
-      (he-substitute-string (car he-expand-list))
-      (setq he-expand-list nil)
-      t))
-
-  (defun set-up-hippie-expand-for-elisp ()
-    "Locally set `hippie-expand' completion functions for use with Emacs Lisp."
-    (make-local-variable 'hippie-expand-try-functions-list)
-    (add-to-list 'hippie-expand-try-functions-list 'try-complete-lisp-symbol t)
-    (add-to-list 'hippie-expand-try-functions-list 'try-complete-lisp-symbol-partially t)
-    (add-to-list 'hippie-expand-try-functions-list 'my/try-complete-lisp-symbol-without-namespace t))
-
-  (defun xt3/lisp-setup ()
-    "Enable features useful in any Lisp mode."
-    (rainbow-delimiters-mode t)
-    ;;  (enable-paredit-mode)
-    (eldoc-mode)
-    (redshank-mode)
-    (lispy-mode 1)
-    (add-hook 'after-save-hook #'check-parens nil t))
-
-  (defun xt3/emacs-lisp-setup ()
-    "Enable features useful when working with elisp."
-    (set-up-hippie-expand-for-elisp)
-    ;(ac-emacs-lisp-mode-setup)
-  )
-
-  (defconst xt3/elispy-modes
-    '(emacs-lisp-mode ielm-mode)
-    "Major modes relating to elisp.")
-
-  (defconst xt3/lispy-modes
-    (append xt3/elispy-modes
-            '(lisp-mode inferior-lisp-mode lisp-interaction-mode))
-    "All lispy major modes.")
-
-  ;; (dolist (hook xt3/lispy-modes)
-  ;;   (add-hook hook 'xt3/lisp-setup))
-
-  ;; (dolist (hook xt3/elispy-modes)
-  ;;   (add-hook hook 'xt3/emacs-lisp-setup))
-
-  (require 'derived)
-
-  (dolist (hook (mapcar #'derived-mode-hook-name xt3/lispy-modes))
-    (add-hook hook 'xt3/lisp-setup))
-
-  (dolist (hook (mapcar #'derived-mode-hook-name xt3/elispy-modes))
-    (add-hook hook 'xt3/emacs-lisp-setup))
-
-#+END_SRC
-
-* -
-* Swift
-#+BEGIN_SRC emacs-lisp
-(use-package swift-mode
-  :ensure t
-  )
-#+END_SRC
-* -
-* Magit
-#+BEGIN_SRC emacs-lisp
-(use-package magit
-  :ensure t
-  :bind ("C-c g" . magit-status)
-  :config
-  (define-key magit-status-mode-map (kbd "q") 'magit-quit-session))
-
-;; full screen magit-status
-(defadvice magit-status (around magit-fullscreen activate)
-  (window-configuration-to-register :magit-fullscreen)
-  ad-do-it
-  (delete-other-windows))
-
-(defun magit-quit-session ()
-  "Restores the previous window configuration and kills the magit buffer"
-  (interactive)
-  (kill-buffer)
-  (jump-to-register :magit-fullscreen))
-
-#+END_SRC
-* -
-* Org
-#+BEGIN_SRC emacs-lisp
 ;;; Speed command
 (setq org-use-speed-commands t)
 
@@ -993,8 +317,8 @@
 
 ;;; Clock
 ;; To save the clock history across Emacs sessions
-;;(setq org-clock-persist 'history)
-;;(org-clock-persistence-insinuate)
+(setq org-clock-persist ’history)
+(org-clock-persistence-insinuate)
 
 
 ;;; Bebel
@@ -1025,35 +349,724 @@
       org-src-window-setup 'current-window
       org-src-strip-leading-and-trailing-blank-lines t
       org-src-preserve-indentation t
-      org-src-tab-acts-natively t)
+      org-src-tab-acts-natively t
+      org-hide-block-startup t)
+#+END_SRC
+- org-bullets
+  #+BEGIN_SRC emacs-lisp
+(use-package org-bullets
+  :config
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  #+END_SRC
+- ox-pandoc
+  #+begin_src emacs-lisp
+(use-package ox-pandoc
+  :no-require t)
+  #+end_src
+** Dired
+#+BEGIN_SRC emacs-lisp
+(add-hook 'dired-mode-hook 'auto-revert-mode)
+;; Also auto refresh dired, but be quiet about it
+(setq global-auto-revert-non-file-buffers t)
+(setq auto-revert-verbose nil)
+
+;;(setq dired-recursive-deletes 'always)
+;;(setq dired-recursive-copies 'always)
+
+(setq dired-isearch-filenames 'dwim)
+(setq-default diredp-hide-details-initially-flag nil
+              dired-dwim-target t)
+
+(use-package dired+)
+
+(use-package dired-sort)
+
+;; (use-package diff-hl
+;;   :ensure t
+;;   :config (add-hook 'dired-mode-hook 'diff-hl-dired-mode))
+#+END_SRC
+* Mode
+** UI
+*** Ido
+#+begin_src emacs-lisp
+(use-package ido
+  :config (progn
+            (setq ido-enable-flex-matching t)
+            (setq ido-everywhere t)
+            (ido-mode t)
+            ;; (use-package ido-ubiquitous
+            ;;   :init (ido-ubiquitous-mode))
+            (use-package ido-vertical-mode
+              :config (ido-vertical-mode 1)
+              (setq ido-vertical-define-keys 'C-n-and-C-p-only))
+            ))
+#+end_src
+*** Smart mode line
+#+BEGIN_SRC emacs-lisp
+(use-package smart-mode-line
+  :config (progn
+            ;;(setq sml/theme 'dark)
+            ;;(setq sml/theme 'light)
+            (setq sml/theme 'respectful)
+            (setq sml/no-confirm-load-theme t)
+            (sml/setup)
+            (set-face-attribute `mode-line nil
+                                :box nil)
+            (set-face-attribute `mode-line-inactive nil
+                                :box nil)
+            ))
+#+END_SRC
+*** COMMENT Aggressive Indent
+#+BEGIN_SRC emacs-lisp
+(use-package aggressive-indent
+  :config
+  (progn
+    (global-aggressive-indent-mode t)
+    ))
+#+END_SRC
+*** Ivy  
+#+BEGIN_SRC emacs-lisp
+(use-package counsel
+  :config (progn 
+            (ivy-mode 1)
+            ;; Basic
+            ;; (setq ivy-use-virtual-buffers t)
+            (setq ivy-count-format "(%d/%d) ")
+            (ivy-wrap t) ; cycle past the last and the first candidates 
+            )
+  :bind
+  ("C-s" . swiper)
+  ;; ("M-x" . counsel-M-x)
+  ;; ("C-x C-f" . counsel-find-file)
+  ;;("<f1> f" . counsel-describe-function)
+  ;;("<f1> v" . counsel-describe-variable)
+  ;;("<f1> l" . counsel-find-library)
+  ;;("<f2> i" . counsel-info-lookup-symbol)
+  ;;("<f2> u" . counsel-unicode-char)
+  ;;("C-c C-r" . ivy-resume)
+  ;; shell, system
+  ;;("C-c g" . counsel-git)
+  ;;("C-c j" . counsel-git-grep)
+  ;;("C-c k" . counsel-ag)
+  ;;("C-x l" . counsel-locate)
+  
+  )
+;(define-key read-expression-map (kbd "C-r") 'counsel-expression-hisstory)
+#+END_SRC
+*** Helm
+#+begin_src emacs-lisp
+(use-package helm
+  :diminish helm-mode
+  :init 
+  (progn
+    (require 'helm-config)
+    (use-package helm-projectile
+      :commands helm-projectile
+      :bind ("C-c p h" . helm-projectile))
+    (use-package helm-ag)
+    (setq helm-exit-idle-delay 0.1
+          helm-input-idle-delay 0.01
+          helm-idle-delay 0.0
+          ;;- truncate long lines in helm completion
+          ;; helm-truncate-lines t
+          ;; may be overridden if 'ggrep' is in path (see below)
+          helm-grep-default-command
+          "grep -a -d skip %e -n%cH -e %p %f"
+          helm-grep-default-recurse-command
+          "grep -a -d recurse %e -n%cH -e %p %f"
+          ;;
+          ;; helm-locate-command "mdfind -interpret -name %s %s"
+          ;; do not display invisible candidates
+          helm-quick-update t
+          ;; open helm buffer in another window
+          helm-split-window-default-side 'other
+          helm-move-to-line-cycle-in-source     t
+          helm-echo-input-in-header-line t
+          ;; open helm buffer inside current window, don't occupy whole other window
+          helm-split-window-in-side-p t
+          ;; limit the number of displayed canidates
+          helm-candidate-number-limit 100
+          ;;- don't use recentf stuff in helm-ff
+          ;; helm-ff-file-name-history-use-recentf nil
+          helm-ff-search-library-in-sexp        t 
+          ;;- don't displace the header line
+          ;; helm-display-header-line nil
+          ;;- fuzzy matching
+          helm-M-x-fuzzy-match t
+          helm-buffers-fuzzy-matching t
+          helm-recentf-fuzzy-match    t
+          helm-semantic-fuzzy-match t
+          helm-imenu-fuzzy-match t
+          helm-completion-in-region-fuzzy-match t
+          helm-ag-fuzzy-match t
+          helm-locate-fuzzy-match t
+          ;;-
+          projectile-indexing-method 'alien
+          helm-ff-newfile-prompt-p nil
+          helm-yas-display-key-on-candidate t
+          helm-M-x-requires-pattern nil
+          helm-ff-skip-boring-files t)
+    (helm-mode 1))
+  :bind
+  (("C-c h" . helm-command-prefix)
+   ("C-x b" . helm-mini)
+   ("C-x C-b" . helm-buffers-list)
+   ("C-`" . helm-resume)
+   ("M-x" . helm-M-x)
+   ("C-x C-f" . helm-find-files)
+   ("M-y" . helm-show-kill-ring)
+   ("C-x c SPC" . helm-all-mark-rings)
+   
+   ("C-h a" . helm-apropos)
+   ("C-c h o" . helm-occur)
+   ;;("C-c h s" . helm-swoop)
+   
+   ("C-c h y" . helm-yas-complete)
+   ("C-c h Y" . helm-yas-create-snippet-on-region)
+   ;;("C-c h t" . helm-world-time)
+   ("C-c h m" . helm-man-woman)
+   ("C-c h a" . helm-do-ag)
+   ("M-g >" . helm-ag-this-file)
+   ("M-g ," . helm-ag-pop-stack)
+   ("M-g ." . helm-do-grep)
+   ;;("C-x C-i" . helm-semantic-or-imenu)
+   
+   ))
+
+(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebind tab to do persistent action
+(define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB works in terminal
+(define-key helm-map (kbd "C-z")  'helm-select-action) ; list actions using C-z
+
+;;Great for describing bindings. I'll replace the binding for where-is too.
+(use-package helm-descbinds
+  :config (helm-descbinds-mode)
+  :bind 
+  (("C-h b" . helm-descbinds)
+   ("C-h w" . helm-descbinds)))
+
+(use-package helm-swoop
+  :ensure t
+  :bind 
+  (("M-i" . helm-swoop)
+   ("M-I" . helm-swoop-back-to-last-point)
+   ("C-c M-i" . helm-multi-swoop))
+  :config
+  (progn
+    ;; When doing isearch, hand the word over to helm-swoop
+    (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
+    ;; From helm-swoop to helm-multi-swoop-all
+    (define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
+    ;; Save buffer when helm-multi-swoop-edit complete
+    (setq helm-multi-swoop-edit-save t
+          ;; If this value is t, split window inside the current window
+          helm-swoop-split-with-multiple-windows nil
+          ;; Split direcion. 'split-window-vertically or 'split-window-horizontally
+          helm-swoop-split-direction 'split-window-vertically
+          ;; If nil, you can slightly boost invoke speed in exchange for text color
+          helm-swoop-speed-or-color nil)))
+#+end_src
+
+** View
+*** pos-tip 
+#+BEGIN_SRC emacs-lisp
+(use-package pos-tip)
+#+END_SRC
+*** Undo tree mode
+#+BEGIN_SRC emacs-lisp
+(use-package undo-tree
+  :diminish undo-tree-mode
+  :config
+  (progn
+    (global-undo-tree-mode)
+    (setq undo-tree-visualizer-timestamps t)
+    (setq undo-tree-visualizer-diff t)
+    (define-key undo-tree-map (kbd "C-x u") 'undo-tree-visualize)
+    (define-key undo-tree-map (kbd "C-/") 'undo-tree-undo)
+    ))
+#+END_SRC
+*** Rainbow Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package rainbow-mode
+    :config
+    (add-hook 'css-mode-hook 'rainbow-mode))
+#+END_SRC
+*** COMMENT Smooth-scroll
+#+begin_src emacs-lisp
+(use-package smooth-scroll
+  :config
+  (smooth-scroll-mode 1)
+  (setq smooth-scroll/vscroll-step-size 5)
+  )
+#+end_src
+
+*** COMMENT Visual Regexp
+#+begin_src emacs-lisp
+(use-package visual-regexp
+  :init
+  (use-package visual-regexp-steroids)
+  :bind (("C-c r" . vr/replace)
+         ("C-c q" . vr/query-replace)
+         ;; Need multiple cursors
+         ("C-c m" . vr/mc-mark) 
+         ;; use visual-regexp-steroids's isearch instead of the built-in regexp isearch
+         ("C-M-r" . vr/isearch-backward)
+         ("C-M-s" . vr/isearch-forward)))
+#+end_src
+** Jump
+*** Avy
+#+BEGIN_SRC emacs-lisp
+  (use-package avy
+    :config (progn
+              (global-set-key (kbd "C-;") 'avy-goto-char)
+              ;;(global-set-key (kbd "C-'") 'avy-goto-char-2)
+              (global-set-key (kbd "M-g f") 'avy-goto-line)
+              ;; (global-set-key (kbd "M-g e") 'avy-goto-word-0)
+              (global-set-key (kbd "M-g w") 'avy-goto-word-1)))
+#+END_SRC
+*** Ace Window
+#+begin_src emacs-lisp
+(use-package ace-window
+  :config (progn
+            (setq aw-keys '(?a ?o ?e ?u ?h ?t ?n ?s))
+            (ace-window-display-mode))
+  :bind ("s-o" . ace-window))
+#+end_src
+** Edit
+*** Multiple cursors
+#+begin_src emacs-lisp
+(use-package multiple-cursors
+  :config
+  (setq mc/always-run-for-all t)
+  (global-unset-key (kbd "M-<down-mouse-1>"))
+  (global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
+  )
+
+
+(global-set-key
+ (kbd "C-S-c")
+ (defhydra hydra-mc  ()
+   "multiple-cursors"
+   ("ll" mc/edit-lines "lines")
+   ("le" mc/edit-ends-of-lines)
+   ("j" mc/mark-next-like-this "next")
+   ("J" mc/unmark-next-like-this)
+   ("k" mc/mark-previous-like-this "prev")
+   ("K" mc/unmark-previous-like-this)
+   ("a" mc/mark-all-like-this "all")
+   ("A" mc/mark-all-dwim "dwim")
+   ("sn" mc/skip-to-next-like-this "skip-n")
+   ("sp" mc/skip-to-previous-like-this "skip-p")
+   ;; ("i" mc/insert-numbers)
+   ))
+
+;; ( "h" mc-hide-unmatched-lines-mode)
+;; ( "dd" mc/mark-all-symbols-like-this-in-defun)
+;; ( "dr" mc/reverse-regions)
+;; ( "ds" mc/sort-regions)
+
+#+end_src
+*** whole-line-or-region
+#+BEGIN_SRC emacs-lisp
+(use-package whole-line-or-region
+  :diminish whole-line-or-region-mode
+  :config
+  (whole-line-or-region-mode t)
+  (make-variable-buffer-local 'whole-line-or-region-mode)
+)
+#+END_SRC
+*** Smartparens mode
+#+begin_src emacs-lisp
+(use-package smartparens
+  :diminish smartparens-mode
+  :config (progn (require 'smartparens-config)
+                 (smartparens-global-mode t)))
+
+(sp-local-pair 'org-mode "~" "~" :actions '(wrap))
+(sp-local-pair 'org-mode "/" "/" :actions '(wrap))
+(sp-local-pair 'org-mode "*" "*" :actions '(wrap))
+#+end_src
+** Search 
+*** Ag
+#+BEGIN_SRC emacs-lisp
+(use-package ag
+  :commands ag)
 #+END_SRC
 
-* ox-pandoc
-- Pandoc converts between a huge number of different file formats. 
-
+** Assist
+*** Winner mode
 #+begin_src emacs-lisp
-(use-package ox-pandoc
-  ;;:no-require t
-  :ensure t)
+(winner-mode t)
+#+end_src
+*** Which Key
+#+BEGIN_SRC emacs-lisp
+(use-package which-key
+  :config
+  (progn
+    (which-key-mode)
+    (which-key-setup-side-window-bottom)
+    ))
+#+END_SRC
+*** Company  
+#+BEGIN_SRC emacs-lisp
+(use-package company
+  :config
+  (progn
+    ;; (setq company-backends (nconc (list 'company-slime) company-backends))
+    ;; ---company-backends
+    ;; company-semantic
+    ;; company-slime
+    ;; company-files
+    ;; company-capf
+    ;; company-css
+    ;; company-nxml
+    ;; company-ispell
+    ;; company-yasnippet
+    ;; company-dabbrev
+    ;; company-keywords
+    ;; company-template
+
+    ;; not always down case
+    (setq company-dabbrev-downcase nil)
+
+    (add-hook 'after-init-hook 'global-company-mode)
+    (setq company-auto-complete nil)
+    (setq company-show-numbers t)
+    (setq company-idle-delay 0))
+  :bind
+  ("C-M-<tab>" . company-complete))
+
+
+(use-package company-statistics
+  :config (add-hook 'after-init-hook 'company-statistics-mode))
+
+(use-package company-quickhelp
+  :config
+  (company-quickhelp-mode 1)
+  (setq company-quickhelp-delay nil))
+
+;; flx based fuzzy matching for company
+(use-package company-flx
+  :config (company-flx-mode 1))
+
+
+(define-key company-active-map (kbd "C-h") 'company-quickhelp-manual-begin)
+(define-key company-active-map (kbd "C-n") 'company-select-next)
+(define-key company-active-map (kbd "C-p") 'company-select-previous)
+(define-key company-active-map (kbd "C-d") 'company-show-doc-buffer)
+(define-key company-active-map (kbd "M-.") 'company-show-location)
+
+
+;; (require 'color)
+;; (let ((bg (face-attribute 'default :background)))
+;;   (custom-set-faces
+;;    `(company-tooltip ((t (:inherit default :background ,(color-lighten-name bg 2)))))
+;;    `(company-scrollbar-bg ((t (:background ,(color-lighten-name bg 10)))))
+;;    `(company-scrollbar-fg ((t (:background ,(color-lighten-name bg 5)))))
+;;    `(company-tooltip-selection ((t (:inherit font-lock-function-name-face))))
+;;    `(company-tooltip-common ((t (:inherit font-lock-constant-face))))))
+#+END_SRC
+- slime
+  #+BEGIN_SRC emacs-lisp
+(use-package slime-company
+  :config (setq slime-company-completion 'fuzzy))  
+  #+END_SRC
+- Web
+  #+BEGIN_SRC emacs-lisp
+(use-package company-web-html
+  :config
+  (add-hook 'web-mode-hook
+            (lambda () 
+              (set (make-local-variable 'company-backends) (cons 'company-web-html company-backends)))))
+  #+END_SRC
+
+
+*** Yasnippet
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :diminish yas-minor-mode
+  :config (progn
+            (yas-global-mode)
+            (define-key yas-minor-mode-map (kbd "<tab>") nil)
+            (define-key yas-minor-mode-map (kbd "TAB") nil)
+            (define-key yas-minor-mode-map (kbd "M-/") 'yas-expand)
+
+            (setq yas-snippet-dirs (concat user-emacs-directory "snippets"))
+            
+            (add-hook 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
+            (setq yas-expand-only-for-last-commands '(self-insert-command))
+            
+            ))
+
+
+#+end_src
+*** Projectile
+#+begin_src emacs-lisp
+(use-package projectile
+  :diminish projectile-mode
+  :commands projectile-mode
+  :config (progn
+            (projectile-global-mode t)
+            (setq projectile-enable-caching t)))
 #+end_src
 
-* -----
-* Shell
-
+** Programming
+*** Flycheck
 #+begin_src emacs-lisp
-(bind-key "C-x m" 'shell)
-(bind-key "C-x M" 'ansi-term)
+(use-package flycheck
+  :config (progn
+            ;;(setq flycheck-html-tidy-executable "tidy5")
+            (add-hook 'after-init-hook #'global-flycheck-mode)
+            ))
 #+end_src
-* -----
+** Lisp
+*** Rainbow delimiters
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-delimiters)
+#+END_SRC
+*** Redshank 
+#+BEGIN_SRC emacs-lisp
+(use-package redshank
+  :diminish redshank-mode
+  )
+#+END_SRC
+*** Slime
+#+BEGIN_SRC emacs-lisp
+(use-package slime
+  :config (progn
+            (require 'slime-autoloads)
+            ;; (setq inferior-lisp-program "/usr/bin/sbcl")
+            (slime-setup '(slime-fancy))
+            ;; (slime-setup '(slime-repl
+            ;;                slime-autodoc 
+            ;;                slime-company
+            ;;                slime-fuzzy))
+
+            (when (executable-find "sbcl")
+              (add-to-list 'slime-lisp-implementations
+                           '(sbcl ("sbcl") :coding-system utf-8-unix)))
+            (when (executable-find "scheme")
+              (add-to-list 'slime-lisp-implementations
+                           '(scheme ("scheme") :coding-system utf-8-unix)))
+            (when (executable-find "ccl")
+              (add-to-list 'slime-lisp-implementations
+                           '(ccl ("ccl") :coding-system utf-8-unix)))
+
+            (setf slime-default-lisp 'sbcl) ; select : M-- M-x slime ccl
+
+            (setq slime-protocol-version 'ignore)
+            (setq slime-net-coding-system 'utf-8-unix)
+            ;; We tell slime to not load failed compiled code
+            (setq slime-load-failed-fasl 'never)
+            (setq slime-complete-symbol*-fancy t)))
+
+
+#+END_SRC
+
+*** Lispy
+
+#+BEGIN_SRC emacs-lisp
+(use-package lispy
+  :config
+  (progn
+    (defun xt3/newline-and-indent ()
+      (interactive)
+      (if (eq major-mode 'slime-repl-mode)
+          (slime-repl-newline-and-indent)
+        (lispy-newline-and-indent)))
+    (substitute-key-definition 'lispy-newline-and-indent 'xt3/newline-and-indent lispy-mode-map))
+  :bind
+  ("C-M-," . lispy-mark))
+#+END_SRC
+*** Elisp-slime-nav
+#+BEGIN_SRC emacs-lisp
+(use-package elisp-slime-nav
+  :config 
+  (dolist (hook '(emacs-lisp-mode-hook ielm-mode-hook))
+    (add-hook hook 'elisp-slime-nav-mode))
+  )
+#+END_SRC
+
+
+** Swift
+#+begin_src emacs-lisp 
+(use-package swift-mode) 
+#+end_src
+
+** Web
+*** Web Mode
+#+begin_src emacs-lisp :tangle no
+(use-package web-mode
+  :config
+  (progn
+    (setq web-mode-markup-indent-offset 2)
+    (setq web-mode-css-indent-offset 2)
+    (setq web-mode-code-indent-offset 2)
+    (setq web-mode-enable-current-element-highlight t)
+    (setq web-mode-ac-sources-alist
+          '(("php" . (ac-source-yasnippet ac-source-php-auto-yasnippets))
+            ("html" . (ac-source-emmet-html-aliases ac-source-emmet-html-snippets))
+            ("css" . (ac-source-css-property ac-source-emmet-css-snippets))))
+    (setq web-mode-enable-auto-closing t) ;; </ -> </..>
+    (setq web-mode-enable-current-column-highlight t)
+    (setq web-mode-enable-auto-pairing t)
+    
+    ))
+
+(define-key web-mode-map
+  (kbd "<f2>")
+  (defhydra hydra-web ()
+    "Web mode" 
+    ("e/" web-mode-element-close "close")
+    ("ea" web-mode-element-content-select "content-select")
+    ("eb" web-mode-element-beginning "beginning")
+    ("ec" web-mode-element-clone "clone")
+    ("ed" web-mode-element-child "child")
+    ("ee" web-mode-element-end "end")
+    ("ef" web-mode-element-children-fold-or-unfold "fold")
+    ("ei" web-mode-element-insert "insert")
+    ("ek" web-mode-element-kill "kill")
+    ("em" web-mode-element-mute-blanks "mute-blanks")
+    ("en" web-mode-element-next "next")
+    ("ep" web-mode-element-previous "previous")
+    ("er" web-mode-element-rename "rename")
+    ("es" web-mode-element-select "select")
+    ("et" web-mode-element-transpose "transpose")
+    ("eu" web-mode-element-parent "parent")
+    ("ev" web-mode-element-vanish "vanish")
+    ("ew" web-mode-element-wrap "wrap")))
+#+end_src
+
+*** Emmet
+#+begin_src emacs-lisp
+(use-package emmet-mode
+  :commands emmet-mode
+  :config
+  (add-hook 'html-mode-hook 'emmet-mode)
+  (add-hook 'web-mode-hook 'emmet-mode)
+  (add-hook 'css-mode-hook 'emmet-mode)
+  (add-hook 'sgml-mode-hook 'emmet-mode) ;; Auto-start on any markup modes
+)
+#+end_src
+
+*** Impation Mode 
+#+BEGIN_SRC emacs-lisp
+(use-package impatient-mode)
+;; Require: Simple-httpd, Htmlize
+#+END_SRC
+
+** Git
+*** Magit
+#+BEGIN_SRC emacs-lisp
+(use-package magit
+  :bind ("C-c g" . magit-status)
+  :config
+  (define-key magit-status-mode-map (kbd "q") 'magit-quit-session))
+
+;; full screen magit-status
+(defadvice magit-status (around magit-fullscreen activate)
+  (window-configuration-to-register :magit-fullscreen)
+  ad-do-it
+  (delete-other-windows))
+
+(defun magit-quit-session ()
+  "Restores the previous window configuration and kills the magit buffer"
+  (interactive)
+  (kill-buffer)
+  (jump-to-register :magit-fullscreen))
+
+#+END_SRC
+
+* Supply
+** Edit
+#+BEGIN_SRC elisp
+(defun sanityinc/kill-back-to-indentation ()
+  "Kill from point back to the first non-whitespace character on the line."
+  (interactive)
+  (let ((prev-pos (point)))
+    (back-to-indentation)
+    (kill-region (point) prev-pos)))
+
+(bind-key "C-M-<backspace>" 'sanityinc/kill-back-to-indentation)
+#+END_SRC
+** Search
+#+BEGIN_SRC emacs-lisp
+;; Occur
+;; takes current region or  symbol at point as  default value for occur
+(defun occur-dwim ()
+  "Call `occur' with a sane default."
+  (interactive)
+  (push (if (region-active-p)
+            (buffer-substring-no-properties
+             (region-beginning)
+             (region-end))
+          (thing-at-point 'symbol))
+        regexp-history)
+  (call-interactively 'occur))
+
+(bind-key "M-s o" 'occur-dwim)
+#+END_SRC
+** Complete
+#+BEGIN_SRC emacs-lisp
+(defun check-expansion ()
+  (save-excursion
+    (if (looking-at "\\_>") t
+      (backward-char 1)
+      (if (looking-at "\\.") t
+        (backward-char 1)
+        (if (looking-at "->") t nil)))))
+
+(defun tab-indent-or-complete ()
+  (interactive)
+  (if (minibufferp)
+      (minibuffer-complete)
+    (if (or (not yas-minor-mode)
+            (null (yas-expand)))
+        (if (check-expansion)
+            (company-complete-common)
+          (indent-for-tab-command)))))
+
+(global-set-key [tab] 'tab-indent-or-complete)
+#+END_SRC
+** Lisp
+#+BEGIN_SRC emacs-lisp
+(defun xt3/lisp-setup ()
+  "Enable features useful in any Lisp mode."
+  (rainbow-delimiters-mode t)
+  (redshank-mode)
+  (lispy-mode 1))
+
+(defconst xt3/elispy-modes
+  '(emacs-lisp-mode ielm-mode)
+  "Major modes relating to elisp.")
+
+(defconst xt3/lispy-modes
+  (append xt3/elispy-modes
+          '(lisp-mode inferior-lisp-mode lisp-interaction-mode slime-repl-mode))
+  "All lispy major modes.")
+
+(require 'derived)
+
+(dolist (hook (mapcar #'derived-mode-hook-name xt3/lispy-modes))
+  (add-hook hook 'xt3/lisp-setup))
+
+(dolist (hook (mapcar #'derived-mode-hook-name xt3/lispy-modes))
+  (add-hook hook (lambda ()
+                   (set (make-local-variable 'company-backends)
+                        (cons 'company-slime company-backends)))))
+
+#+END_SRC
+** Web
+#+BEGIN_SRC emacs-lisp
+(setq auto-mode-alist
+      (append
+       '(("\\.js\\'" . js2-mode))
+       '(("\\.html\\'" . web-mode))
+       auto-mode-alist))
+#+END_SRC
+
+* ----
 * Xt3
 #+BEGIN_SRC emacs-lisp
 (setq xt3-lisp (expand-file-name "xt3Lisp.el" user-emacs-directory))
 (load xt3-lisp)
 #+END_SRC
-
-* Reference
-- https://github.com/purcell/emacs.d
-- https://github.com/danielmai/.emacs.d 
-- [[https://github.com/magnars/.emacs.d/blob/master/settings/sane-defaults.el][Magnars Sveen]] 
-- [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua]]
-- http://ergoemacs.org/emacs/emacs_buffer_management.html
