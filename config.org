@@ -300,26 +300,8 @@
 (bind-key "C-c c" 'org-capture)
 (bind-key "C-c a" 'org-agenda)
 
-;;; Agenda
-
-;;; Capture
-;(setq org-default-notes-file "~/Dropbox/Notes/notes.org")
-(setq org-capture-templates
-      '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
-         "* TODO %?\n  %i\n  %a")
-        ("j" "Journal" entry (file+datetree "~/org/journal.org")
-	 "* %?\nEntered on %U\n  %i\n  %a" :clock-resume t)
-        ("n" "Notes" entry (file+headline "~/org/notes.org" "Notes")
-	 "* %?\nEntered on %U\n  %i\n  %a" :clock-resume t)))
-
 ;;; Tag 
 (setq org-tags-column 45)
-
-;;; Clock
-;; To save the clock history across Emacs sessions
-(setq org-clock-persist ’history)
-(org-clock-persistence-insinuate)
-
 
 ;;; Bebel
 (org-babel-do-load-languages
@@ -636,10 +618,10 @@
 #+begin_src emacs-lisp
 (use-package multiple-cursors
   :config
-  (setq mc/always-run-for-all t)
-  (global-unset-key (kbd "M-<down-mouse-1>"))
-  (global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
-  )
+  (setq mc/always-run-for-all t))
+
+(global-unset-key (kbd "M-<down-mouse-1>"))
+(global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
 
 
 (global-set-key
@@ -772,11 +754,11 @@
   #+END_SRC
 - Web
   #+BEGIN_SRC emacs-lisp
-(use-package company-web-html
-  :config
-  (add-hook 'web-mode-hook
+(require 'company-web-html)
+(add-hook 'web-mode-hook
             (lambda () 
-              (set (make-local-variable 'company-backends) (cons 'company-web-html company-backends)))))
+              (set (make-local-variable 'company-backends)
+                   (cons 'company-web-html company-backends))))
   #+END_SRC
 
 
@@ -851,7 +833,7 @@
               (add-to-list 'slime-lisp-implementations
                            '(ccl ("ccl") :coding-system utf-8-unix)))
 
-            (setf slime-default-lisp 'sbcl) ; select : M-- M-x slime ccl
+            ;;(setf slime-default-lisp 'sbcl) ; select : M-- M-x slime ccl
 
             (setq slime-protocol-version 'ignore)
             (setq slime-net-coding-system 'utf-8-unix)
@@ -886,7 +868,6 @@
   )
 #+END_SRC
 
-
 ** Swift
 #+begin_src emacs-lisp 
 (use-package swift-mode) 
@@ -894,7 +875,7 @@
 
 ** Web
 *** Web Mode
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package web-mode
   :config
   (progn
