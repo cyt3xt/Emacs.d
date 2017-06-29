@@ -368,6 +368,11 @@
 ;;   :config (add-hook 'dired-mode-hook 'diff-hl-dired-mode))
 #+END_SRC
 * Mode
+** Dependency
+#+BEGIN_SRC emacs-lisp
+(use-package hydra)
+(use-package paredit)
+#+END_SRC
 ** UI
 *** Ido
 #+begin_src emacs-lisp
@@ -462,7 +467,7 @@
           helm-quick-update t
           ;; open helm buffer in another window
           helm-split-window-default-side 'other
-          helm-move-to-line-cycle-in-source     t
+          helm-move-to-line-cycle-in-source nil
           helm-echo-input-in-header-line t
           ;; open helm buffer inside current window, don't occupy whole other window
           helm-split-window-in-side-p t
@@ -470,13 +475,13 @@
           helm-candidate-number-limit 100
           ;;- don't use recentf stuff in helm-ff
           ;; helm-ff-file-name-history-use-recentf nil
-          helm-ff-search-library-in-sexp        t 
+          helm-ff-search-library-in-sexp t
           ;;- don't displace the header line
           ;; helm-display-header-line nil
           ;;- fuzzy matching
           helm-M-x-fuzzy-match t
           helm-buffers-fuzzy-matching t
-          helm-recentf-fuzzy-match    t
+          helm-recentf-fuzzy-match t
           helm-semantic-fuzzy-match t
           helm-imenu-fuzzy-match t
           helm-completion-in-region-fuzzy-match t
@@ -527,7 +532,6 @@
    ("C-h w" . helm-descbinds)))
 
 (use-package helm-swoop
-  :ensure t
   :bind 
   (("M-i" . helm-swoop)
    ("M-I" . helm-swoop-back-to-last-point)
@@ -754,11 +758,12 @@
   #+END_SRC
 - Web
   #+BEGIN_SRC emacs-lisp
-(require 'company-web-html)
+;; (require 'company-web-html)
+(use-package company-mode)
 (add-hook 'web-mode-hook
-            (lambda () 
-              (set (make-local-variable 'company-backends)
-                   (cons 'company-web-html company-backends))))
+          (lambda () 
+            (set (make-local-variable 'company-backends)
+                 (cons 'company-web-html company-backends))))
   #+END_SRC
 
 
@@ -813,35 +818,14 @@
 #+END_SRC
 *** Slime
 #+BEGIN_SRC emacs-lisp
-(use-package slime
-  :config (progn
-            (require 'slime-autoloads)
-            ;; (setq inferior-lisp-program "/usr/bin/sbcl")
-            (slime-setup '(slime-fancy))
-            ;; (slime-setup '(slime-repl
-            ;;                slime-autodoc 
-            ;;                slime-company
-            ;;                slime-fuzzy))
-
-            (when (executable-find "sbcl")
-              (add-to-list 'slime-lisp-implementations
-                           '(sbcl ("sbcl") :coding-system utf-8-unix)))
-            (when (executable-find "scheme")
-              (add-to-list 'slime-lisp-implementations
-                           '(scheme ("scheme") :coding-system utf-8-unix)))
-            (when (executable-find "ccl")
-              (add-to-list 'slime-lisp-implementations
-                           '(ccl ("ccl") :coding-system utf-8-unix)))
-
-            ;;(setf slime-default-lisp 'sbcl) ; select : M-- M-x slime ccl
-
-            (setq slime-protocol-version 'ignore)
-            (setq slime-net-coding-system 'utf-8-unix)
-            ;; We tell slime to not load failed compiled code
-            (setq slime-load-failed-fasl 'never)
-            (setq slime-complete-symbol*-fancy t)))
-
-
+;;; Roswell
+(load (expand-file-name "~/.roswell/helper.el"))
+(setq inferior-lisp-program "ros -Q run")
+(setf slime-lisp-implementations
+      `((sbcl    ("sbcl" "--dynamic-space-size" "2000"))
+        (ccl    ("ccl64"))
+        (roswell ("ros" "-Q" "run"))))
+(setf slime-default-lisp 'roswell)
 #+END_SRC
 
 *** Lispy
@@ -855,7 +839,13 @@
       (if (eq major-mode 'slime-repl-mode)
           (slime-repl-newline-and-indent)
         (lispy-newline-and-indent)))
-    (substitute-key-definition 'lispy-newline-and-indent 'xt3/newline-and-indent lispy-mode-map))
+    (substitute-key-definition 'lispy-newline-and-indent 'xt3/newline-and-indent lispy-mode-map)
+    ;; Colon no space
+    (defun xt3/lisp-colon ()
+      "Insert :."
+      (interactive)
+      (insert ":"))
+    (substitute-key-definition 'lispy-colon 'xt3/lisp-colon lispy-mode-map))
   :bind
   ("C-M-," . lispy-mark))
 #+END_SRC
@@ -920,7 +910,6 @@
 *** Emmet
 #+begin_src emacs-lisp
 (use-package emmet-mode
-  :commands emmet-mode
   :config
   (add-hook 'html-mode-hook 'emmet-mode)
   (add-hook 'web-mode-hook 'emmet-mode)
