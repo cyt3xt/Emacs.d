@@ -712,10 +712,10 @@
     ;; company-template
 
     ;; not always down case
-    (setq company-dabbrev-downcase nil)
+    ;; (setq company-dabbrev-downcase nil)
 
     (add-hook 'after-init-hook 'global-company-mode)
-    (setq company-auto-complete nil)
+    ;; (setq company-auto-complete nil)
     (setq company-show-numbers t)
     (setq company-idle-delay 0))
   :bind
@@ -759,11 +759,16 @@
 - Web
   #+BEGIN_SRC emacs-lisp
 ;; (require 'company-web-html)
-(use-package company-mode)
+(use-package company-web)
 (add-hook 'web-mode-hook
           (lambda () 
             (set (make-local-variable 'company-backends)
                  (cons 'company-web-html company-backends))))
+
+(use-package company-tern)
+(add-hook 'js2-mode-hook
+          (lambda () (set (make-local-variable 'company-backends)
+                          (cons 'company-tern company-backends))))
   #+END_SRC
 
 
@@ -845,7 +850,9 @@
       "Insert :."
       (interactive)
       (insert ":"))
-    (substitute-key-definition 'lispy-colon 'xt3/lisp-colon lispy-mode-map))
+    (substitute-key-definition 'lispy-colon 'xt3/lisp-colon lispy-mode-map)
+    (add-to-list 'lispy-goto-symbol-alist
+                 '(slime-repl-mode lispy-goto-symbol-lisp le-lisp)))
   :bind
   ("C-M-," . lispy-mark))
 #+END_SRC
@@ -923,6 +930,18 @@
 (use-package impatient-mode)
 ;; Require: Simple-httpd, Htmlize
 #+END_SRC
+
+*** Javascript
+- js2
+  #+BEGIN_SRC emacs-lisp
+(use-package js2-mode)
+  #+END_SRC
+- tern
+  #+BEGIN_SRC emacs-lisp
+;; (add-to-list 'load-path "/usr/local/lib/node_modules/tern/emacs/")
+;; (autoload 'tern-mode "tern.el" nil t)
+(add-hook 'js-mode-hook (lambda () (tern-mode t)))
+  #+END_SRC
 
 ** Git
 *** Magit
