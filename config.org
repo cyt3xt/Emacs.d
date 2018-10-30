@@ -138,7 +138,9 @@
   #+BEGIN_SRC emacs-lisp
 ;; 设置 sentence-end 可以识别中文标点
 (setq sentence-end
-      "\\([。！？]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*")  
+      "\\([。！？]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*")
+;; 使输入法不闪烁
+(setq redisplay-dont-pause nil)
   #+END_SRC
 ** For Mac
 #+BEGIN_SRC emacs-lisp
@@ -204,7 +206,7 @@
   (setq mac-allow-anti-aliasing t)
 
   ;; Lisp 
-  (setq inferior-lisp-program "ccl")
+  (setq inferior-lisp-program "ccl64")
   
   ;; mdfind is the command line interface to Spotlight
   (setq locate-command "mdfind")
@@ -212,8 +214,7 @@
   ;; exec-path-from-shell : makes the command-line path with Emacs's shell match the same one on OS X.
   (use-package exec-path-from-shell
     :init
-    (exec-path-from-shell-initialize))
-  )
+    (exec-path-from-shell-initialize)))
 #+end_src
 
 ** Desktop Save & Session
@@ -333,6 +334,12 @@
       org-src-preserve-indentation t
       org-src-tab-acts-natively t
       org-hide-block-startup t)
+;;
+(add-to-list 'org-structure-template-alist
+             '("cl" "#+BEGIN_SRC lisp\n?\n#+END_SRC" ""))
+
+;;; Export
+(setq org-html-validation-link nil)
 #+END_SRC
 - org-bullets
   #+BEGIN_SRC emacs-lisp
@@ -411,7 +418,7 @@
     (global-aggressive-indent-mode t)
     ))
 #+END_SRC
-*** Ivy  
+*** Ivy
 #+BEGIN_SRC emacs-lisp
 (use-package counsel
   :config (progn 
@@ -692,7 +699,7 @@
     (which-key-setup-side-window-bottom)
     ))
 #+END_SRC
-*** Company  
+*** Company
 #+BEGIN_SRC emacs-lisp
 (use-package company
   :config
@@ -722,8 +729,8 @@
   ("C-M-<tab>" . company-complete))
 
 
-(use-package company-statistics
-  :config (add-hook 'after-init-hook 'company-statistics-mode))
+;; (use-package company-statistics
+;;   :config (add-hook 'after-init-hook 'company-statistics-mode))
 
 (use-package company-quickhelp
   :config
@@ -754,7 +761,7 @@
 - slime
   #+BEGIN_SRC emacs-lisp
 (use-package slime-company
-  :config (setq slime-company-completion 'fuzzy))  
+  :config (setq slime-company-completion 'fuzzy))
   #+END_SRC
 - Web
   #+BEGIN_SRC emacs-lisp
@@ -770,7 +777,6 @@
           (lambda () (set (make-local-variable 'company-backends)
                           (cons 'company-tern company-backends))))
   #+END_SRC
-
 
 *** Yasnippet
 #+begin_src emacs-lisp
@@ -807,7 +813,7 @@
 (use-package flycheck
   :config (progn
             ;;(setq flycheck-html-tidy-executable "tidy5")
-            (add-hook 'after-init-hook #'global-flycheck-mode)
+            ;;(add-hook 'after-init-hook #'global-flycheck-mode)
             ))
 #+end_src
 ** Lisp
@@ -967,7 +973,7 @@
 
 * Supply
 ** Edit
-#+BEGIN_SRC elisp
+#+BEGIN_SRC emacs-lisp
 (defun sanityinc/kill-back-to-indentation ()
   "Kill from point back to the first non-whitespace character on the line."
   (interactive)

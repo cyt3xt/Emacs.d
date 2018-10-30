@@ -5,7 +5,7 @@
 
 ;;; Set up package
 (require 'package)
-;;
+
 ;; (add-to-list 'package-archives
 ;;              '("gnu" . " https://elpa.gnu.org/packages/") t)
 ;; (add-to-list 'package-archives
@@ -69,3 +69,4 @@
     (progn
       (defconst *is-a-linux* t)))
   (org-babel-load-file (concat user-emacs-directory "config.org")))  
+(put 'scroll-left 'disabled nil)
