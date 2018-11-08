@@ -5,7 +5,7 @@
 
 ;;; Set up package
 (require 'package)
-
+;;
 ;; (add-to-list 'package-archives
 ;;              '("gnu" . " https://elpa.gnu.org/packages/") t)
 ;; (add-to-list 'package-archives
@@ -41,8 +41,9 @@
   :config (auto-compile-on-load-mode))
 (setq load-prefer-newer t)
 
-(require 'diminish)
-(require 'bind-key)
+
+(require 'diminish) 
+(require 'bind-key) ;; use-package:bind-key
 
 
 ;;; UI
@@ -52,21 +53,21 @@
 (tooltip-mode -1)
 (setq inhibit-startup-message t)
 (setq initial-scratch-message "")
-;; Terminal
-(unless window-system
-  (defconst *is-a-terminal* t)
-  (message "It is a Terminal")
-  (menu-bar-mode -1)
-  (org-babel-load-file (concat user-emacs-directory "config.org")))
-;; Window-System
-(when window-system 
-  (if (eq system-type 'darwin)
-      ;; Mac
-      (progn
-        (defconst *is-a-mac* t)
-        (message "System is a Mac"))
-    ;; Linux
+
+;;; Distribute  
+(defvar *sys-is* nil)
+(if window-system 
+  (push :window *sys-is*)
+  (push :terminal *sys-is*))
+(if (eq system-type 'darwin)
     (progn
-      (defconst *is-a-linux* t)))
-  (org-babel-load-file (concat user-emacs-directory "config.org")))  
-(put 'scroll-left 'disabled nil)
+      (push :macos *sys-is*)))
+
+(cond 
+ ((member :terminal *sys-is*)
+  (message "Terminal")
+  (menu-bar-mode -1)
+  (org-babel-load-file (concat user-emacs-directory "Terminal-config.org")))
+ ((member :macos *sys-is*)
+  (message "MacOS")
+  (org-babel-load-file (concat user-emacs-directory "config.org"))))
