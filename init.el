@@ -70,4 +70,7 @@
   (org-babel-load-file (concat user-emacs-directory "Terminal-config.org")))
  ((member :macos *sys-is*)
   (message "MacOS")
+  (org-babel-load-file (concat user-emacs-directory "config.org")))
+ (t
+  (message "Other")
   (org-babel-load-file (concat user-emacs-directory "config.org"))))
