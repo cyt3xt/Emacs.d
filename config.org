@@ -964,6 +964,7 @@
   :diminish redshank-mode)
 #+END_SRC
 *** Slime
+**** Roswell
 #+BEGIN_SRC emacs-lisp
 ;;; Roswell
 (load (expand-file-name "~/.roswell/helper.el"))
@@ -974,7 +975,29 @@
         (roswell ("ros" "-Q" "run"))))
 (setf slime-default-lisp 'roswell)
 #+END_SRC
+**** COMMENT Manual
+#+BEGIN_SRC emacs-lisp
+(use-package slime
+  :config
+  (require 'slime-autoloads)
+  ;; (setq inferior-lisp-program "~/ccl/dx86cl64")
+  (slime-setup '(slime-fancy))
+  
+  (when (executable-find "sbcl")
+    (add-to-list 'slime-lisp-implementations
+                 '(sbcl ("sbcl") :coding-system utf-8-unix)))
+  (when (executable-find "ccl")
+    (add-to-list 'slime-lisp-implementations
+                 '(ccl ("ccl") :coding-system utf-8-unix)))
 
+  (setq slime-default-lisp 'sbcl)       ; select : M-- M-x slime ccl
+
+  (setq slime-net-coding-system 'utf-8-unix)
+  ;; We tell slime to not load failed compiled code
+  (setq slime-load-failed-fasl 'never)
+  (setq slime-complete-symbol*-fancy t))
+
+#+END_SRC
 *** Lispy
 
 #+BEGIN_SRC emacs-lisp
