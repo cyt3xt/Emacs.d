@@ -1040,17 +1040,6 @@
 (use-package swift-mode) 
 #+end_src
 ** C
-- c-mode
-  - C-c C-c == comment-region
-  - M-; == comment-dwim or indent-for-comment
-  - C-M-a == c-beginning-of-defun
-  - C-M-e == c-end-of-defun
-  - M-a = c-beginning-of-statement
-  - M-e = c-end-of-statement
-  - C-c C-u == c-up-conditional
-  - C-c C-p == c-backward-conditional
-  - C-c C-n == c-forward-comditional
-  - C-c C-w == M-x subword-mode
 *** Edit
 #+BEGIN_SRC emacs-lisp
 ;; Senator
@@ -1071,7 +1060,7 @@
 ;; (remove-hook 'c-mode-hook #'turn-on-function-args-mode )
 ;; (add-hook 'c-mode-hook 'turn-on-function-args-mode)
 #+END_SRC
-- Header file : sematic
+- Header file : sematic :?:
   #+BEGIN_SRC emacs-lisp
 (global-semanticdb-minor-mode 1)
 (global-semantic-idle-scheduler-mode 1)
@@ -1083,7 +1072,8 @@
 (defun alexott/cedet-hook ()
   (local-set-key "\C-c\C-j" 'semantic-ia-fast-jump)
   (local-set-key "\C-c\C-s" 'semantic-ia-show-summary)
-  (delete 'company-capf company-backends))
+  (set (make-local-variable 'company-backends)
+       (delete 'company-capf company-backends)))
 
 (add-hook 'c-mode-common-hook 'alexott/cedet-hook)
 (add-hook 'c-mode-hook 'alexott/cedet-hook)
